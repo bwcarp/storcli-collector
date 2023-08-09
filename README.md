@@ -1,4 +1,4 @@
-# node-exporter-storcli.go
+# storcli-collector
 A port of node-exporter-textfile-collector-scripts/storcli.py to Go
 
 This is a drop-in replacement for the storcli.py collector. 
