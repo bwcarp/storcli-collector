@@ -8,7 +8,11 @@ This is a drop-in replacement for the storcli.py collector.
 storcli /cALL show all J
 ```
 
-An additional option `--outfile` is available in this version. This will write to a text file instead of standard out in the event you are using this as a cron.
+## Slight Differences
+
+storcli.py had a default `storcli` path of `/opt/MegaRAID/storcli/storcli64` if you didn't specify with `--storcli_path`. If that file is not found, and no absolute path is specified, this will fall back to searching the user's PATH for `storcli`. If this is a problem, you can disable this behavior with `--storcli_dontfailover`.
+
+An additional option, `--outfile` is available in this version. This will write to a text file instead of standard out in the event you are using this as a cron.
 
 No Makefile is provided, just use go build.
 ```

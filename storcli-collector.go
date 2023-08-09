@@ -641,7 +641,8 @@ func createMetricsOfPhysicalDrive(physicalDrive PhysicalDrive, detailedInfoArray
 
 func main() {
 
-	var storcliPath = flag.String("storcli_path", "/opt/MegaRAID/storcli/storcli64", "path to StorCLI binary")
+	var storcliPath = flag.String("storcli_path", "/opt/MegaRAID/storcli/storcli64", "(Optional) Absolute path to StorCLI binary. Defaults to /opt/MegaRAID/storcli/storcli64 or storcli in PATH")
+	var storcliDontfail = flag.Bool("storcli_dontfailover", false, "(Optional) Don't fall back to PATH env if absolute path is missing.")
 	var version = flag.Bool("version", false, "Get version information")
 	var outputFile = flag.String("outfile", "", "Text file to write output to. Defaults to standard output.")
 
@@ -652,7 +653,26 @@ func main() {
 		os.Exit(0)
 	}
 
-	StorcliPath = *storcliPath
+	// In testing I found that even if storcli is in the user's PATH,
+	// exec.Command won't find it.
+	if _, err := os.Stat(*storcliPath); err == nil {
+		StorcliPath = *storcliPath
+	} else if *storcliDontfail {
+		log.Fatal(err)
+	} else {
+		folders := strings.Split(os.Getenv("PATH"), ":")
+		for _, folder := range folders {
+			executable := fmt.Sprintf("%s/storcli", folder)
+			if _, err := os.Stat(executable); err == nil {
+				StorcliPath = executable
+				break
+			}
+		}
+		if StorcliPath == "" {
+			log.Fatal("storcli not found.")
+		}
+	}
+
 	getControllers := getStorcliJson()
 
 	reg := prometheus.NewRegistry()
