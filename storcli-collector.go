@@ -328,6 +328,9 @@ func getStorcliJson() ControllerData {
 	// Why though?
 	dataString := string(data)
 	dataString = strings.Replace(dataString, `"BBU Status" : "NA",`, `"BBU Status" : 9999,`, 1)
+	if strings.Contains(dataString, `"DG" : "-",`) {
+		dataString = strings.Replace(dataString, `"DG" : "-",`, `"DG" : 9999,`, -1)
+	}
 	data = []byte(dataString)
 
 	var getControllers ControllerData
