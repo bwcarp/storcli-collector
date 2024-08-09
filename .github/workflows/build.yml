@@ -1,6 +1,9 @@
 name: build
 
-on: push
+on:
+  push:
+    tags:
+      - "*"
 
 jobs:
   goreleaser:
@@ -17,6 +20,6 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --clean --snapshot
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
