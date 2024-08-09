@@ -1,0 +1,35 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    binary: storcli-collector
+
+nfpms:
+  - id: default
+    package_name: storcli-collector
+    bindir: /usr/sbin
+    section: network
+    priority: extra
+    replaces: []
+    provides:
+      - storcli-collector
+    formats:
+      - deb
+      - rpm
+    recommends: []
+    suggests: []
+    conflicts: []
+    maintainer: "Blake Carpenter <blake@blakecarpenter.dev>"
+    description: "A port of node-exporter-textfile-collector-scripts/storcli.py to Go"
+    homepage: "https://github.com/blakehartshorn/storcli-collector"
+    license: "Apache 2.0"
+    changelog: ""
