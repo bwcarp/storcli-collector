@@ -17,7 +17,7 @@ import (
 )
 
 const Namespace = "megaraid"
-const Version = "0.0.1"
+const Version = "0.1.0"
 
 var StorcliPath string
 
@@ -327,7 +327,8 @@ func getStorcliJson() ControllerData {
 	// BBU doesn't exist, which won't unpack into the struct.
 	// Why though?
 	dataString := string(data)
-	dataString = strings.Replace(dataString, `"BBU Status" : "NA",`, `"BBU Status" : 9999,`, 1)
+	dataString = strings.Replace(dataString, `"BBU Status" : "NA"`, `"BBU Status" : 9999`, 1)
+	dataString = strings.Replace(dataString, `"DG" : "-"`, `"DG" : 9999`, -1)
 	data = []byte(dataString)
 
 	var getControllers ControllerData
@@ -624,6 +625,12 @@ func createMetricsOfPhysicalDrive(physicalDrive PhysicalDrive, detailedInfoArray
 	model := strings.Replace(physicalDrive.Model, " ", "", -1)
 	firmware := strings.Replace(attributes["Firmware Revision"].(string), " ", "", -1)
 	serial := strings.Replace(attributes["SN"].(string), " ", "", -1)
+
+	// Because sometimes it's not part of a device group.
+	dgFixed := "-"
+	if physicalDrive.DG != 9999 {
+		dgFixed = strconv.Itoa(physicalDrive.DG)
+	}
 	Metrics["pd_info"].With(prometheus.Labels{
 		"controller": controllerIndex,
 		"enclosure":  enclosure,
@@ -632,7 +639,7 @@ func createMetricsOfPhysicalDrive(physicalDrive PhysicalDrive, detailedInfoArray
 		"interface":  physicalDrive.Intf,
 		"media":      physicalDrive.Med,
 		"model":      model,
-		"DG":         strconv.Itoa(physicalDrive.DG),
+		"DG":         dgFixed,
 		"state":      physicalDrive.State,
 		"firmware":   firmware,
 		"serial":     serial,
