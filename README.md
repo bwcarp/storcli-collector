@@ -14,7 +14,7 @@ storcli.py had a default `storcli` path of `/opt/MegaRAID/storcli/storcli64` if 
 
 An additional option, `--outfile` is available in this version. This will write to a text file instead of standard out in the event you are using this as a cron.
 
-No Makefile is provided, just use go build.
+You can use the goreleaser packages attached to the repo, or just use go build. It's not complex enough to warrant a Makefile.
 ```
 go build storcli-collector.go
 ```
