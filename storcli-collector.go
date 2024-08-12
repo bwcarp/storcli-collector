@@ -311,10 +311,7 @@ func getStorcliJson() ControllerData {
 		log.Fatal(err)
 	}
 
-	data, err := exec.Command(StorcliPath, "/cALL", "show", "all", "J").Output()
-	if err != nil {
-		log.Fatal(err)
-	}
+	data, cmdErr := exec.Command(StorcliPath, "/cALL", "show", "all", "J").Output()
 
 	/* TEST CASE - Temporarily use a text file
 	data, err := os.ReadFile("controllers.json")
@@ -332,8 +329,9 @@ func getStorcliJson() ControllerData {
 	data = []byte(dataString)
 
 	var getControllers ControllerData
-	err = json.Unmarshal(data, &getControllers)
+	err := json.Unmarshal(data, &getControllers)
 	if err != nil {
+		log.Print(cmdErr)
 		log.Fatal(err)
 	}
 
@@ -353,14 +351,12 @@ func getStorcliDrivesJson() PhysicalDriveUnpack {
 	}
 	*/
 
-	data, err := exec.Command(StorcliPath, "/cALL/eALL/sALL", "show", "all", "J").Output()
-	if err != nil {
-		log.Fatal(err)
-	}
+	data, cmdErr := exec.Command(StorcliPath, "/cALL/eALL/sALL", "show", "all", "J").Output()
 
 	var jsonOutput PhysicalDriveUnpack
-	err = json.Unmarshal(data, &jsonOutput)
+	err := json.Unmarshal(data, &jsonOutput)
 	if err != nil {
+		log.Print(cmdErr)
 		log.Fatal(err)
 	}
 
@@ -553,7 +549,13 @@ func createMetricsOfPhysicalDrive(physicalDrive PhysicalDrive, detailedInfoArray
 		driveIdentifier = fmt.Sprintf("Drive /c%s/e%s/s%s", controllerIndex, enclosure, slot)
 	}
 
-	info := detailedInfoArray[driveIdentifier+" - Detailed Information"].(map[string]interface{})
+	var info map[string]interface{}
+	switch detailedInfoArray[driveIdentifier+" - Detailed Information"].(type) {
+	case map[string]interface{}:
+		info = detailedInfoArray[driveIdentifier+" - Detailed Information"].(map[string]interface{})
+	default:
+		return
+	}
 	state := info[driveIdentifier+" State"].(map[string]interface{})
 	attributes := info[driveIdentifier+" Device attributes"].(map[string]interface{})
 	settings := info[driveIdentifier+" Policies/Settings"].(map[string]interface{})
