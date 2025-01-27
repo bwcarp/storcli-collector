@@ -17,18 +17,18 @@ import (
 )
 
 const Namespace = "megaraid"
-const Version = "0.1.2"
+const Version = "0.1.3"
 
 var StorcliPath string
 
 type PhysicalDrive struct {
-	EIDSlt string `json:"EID:Slt"`
-	DID    int    `json:"DID"`
-	Intf   string `json:"Intf"`
-	Med    string `json:"Med"`
-	Model  string `json:"Model"`
-	DG     int    `json:"DG"`
-	State  string `json:"State"`
+	EIDSlt string      `json:"EID:Slt"`
+	DID    int         `json:"DID"`
+	Intf   string      `json:"Intf"`
+	Med    string      `json:"Med"`
+	Model  string      `json:"Model"`
+	DG     interface{} `json:"DG"`
+	State  string      `json:"State"`
 }
 
 type PhysicalDriveUnpack struct {
@@ -325,7 +325,6 @@ func getStorcliJson() ControllerData {
 	// Why though?
 	dataString := string(data)
 	dataString = strings.Replace(dataString, `"BBU Status" : "NA"`, `"BBU Status" : 9999`, 1)
-	dataString = strings.Replace(dataString, `"DG" : "-"`, `"DG" : 9999`, -1)
 	data = []byte(dataString)
 
 	var getControllers ControllerData
@@ -629,10 +628,16 @@ func createMetricsOfPhysicalDrive(physicalDrive PhysicalDrive, detailedInfoArray
 	serial := strings.Replace(attributes["SN"].(string), " ", "", -1)
 
 	// Because sometimes it's not part of a device group.
-	dgFixed := "-"
-	if physicalDrive.DG != 9999 {
-		dgFixed = strconv.Itoa(physicalDrive.DG)
+	var dgFixed string
+	switch v := physicalDrive.DG.(type) {
+	case int:
+		dgFixed = strconv.Itoa(v)
+	case string:
+		dgFixed = v
+	default:
+		dgFixed = ""
 	}
+
 	Metrics["pd_info"].With(prometheus.Labels{
 		"controller": controllerIndex,
 		"enclosure":  enclosure,
