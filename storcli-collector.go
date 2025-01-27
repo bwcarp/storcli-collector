@@ -632,6 +632,8 @@ func createMetricsOfPhysicalDrive(physicalDrive PhysicalDrive, detailedInfoArray
 	switch v := physicalDrive.DG.(type) {
 	case int:
 		dgFixed = strconv.Itoa(v)
+	case float64:
+		dgFixed = strconv.Itoa(int(v))
 	case string:
 		dgFixed = v
 	default:
